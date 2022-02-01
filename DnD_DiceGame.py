@@ -6,9 +6,12 @@ number_of_tries = 0
 highest_dice = 0
 took_tries = 0
 
+print('Enter an aproximate number of tries:')
+x = input()
 
 # Repeat everything in this block x number of times
-for i in range(100000):
+for i in range(int(x)): #convert string to integer.
+
 
     # Generate first dice 
     dice_value = random.randint(1, 4)
