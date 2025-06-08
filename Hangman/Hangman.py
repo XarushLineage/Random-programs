@@ -53,8 +53,10 @@ while fails < maxfails:
         guesses.append(guess)
         print("Wrong guess. You have", maxfails - fails, "tries left.")
 
-    # Check if the player has won
-    if set(word) == set(guesses):
+    # Check if all the letters in the word have been guessed. Using equality
+    # between sets would incorrectly require that no extra letters were guessed
+    # which makes it impossible to win after any wrong guess.
+    if set(word).issubset(set(guesses)):
         print("Congratulations, you won!")
         break
 
