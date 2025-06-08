@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from tkinter import Tk, filedialog
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
+from urllib.parse import urljoin
 
 
 def get_save_directory():
@@ -45,7 +46,10 @@ def main():
     soup = BeautifulSoup(response.text, 'html.parser')
 
     # Example filtering: adjust selectors to match the target website
-    links = [a['href'] for a in soup.find_all('a', href=True) if 'Issue' in a.text]
+    # Use urljoin so that relative links become absolute URLs
+    links = [urljoin(base_url, a['href'])
+             for a in soup.find_all('a', href=True)
+             if 'Issue' in a.text]
 
     if not links:
         print("No issue links found.")
@@ -71,7 +75,10 @@ def main():
 
             # Parse the updated page and download all images
             page_soup = BeautifulSoup(driver.page_source, 'html.parser')
-            images = [img['src'] for img in page_soup.find_all('img') if img.get('src')]
+            page_url = driver.current_url
+            images = [urljoin(page_url, img['src'])
+                      for img in page_soup.find_all('img')
+                      if img.get('src')]
 
             for idx, img_url in enumerate(images):
                 download_image(img_url, save_dir, idx)
