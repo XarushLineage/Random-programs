@@ -8,6 +8,8 @@ This script downloads comic page images from a website.
 3. Provide the starting and ending issue numbers (1‑based).
 4. Choose the folder where images should be saved.
 
-The script uses Selenium to open each issue, selects the **All pages** option, waits 10 seconds for images to load and then downloads each image.
+The script uses Selenium to open each issue, selects the **All pages** option, waits 10 seconds for images to load and then downloads each image. Relative links are automatically converted to full URLs.
+
+If the site provides relative issue links (e.g., starting with `/Comic/...`), the script now rebuilds them using the site's base domain before opening them in the browser.
 
 Dependencies: `requests`, `beautifulsoup4`, `selenium`, `tkinter` (usually included with Python) and a Selenium WebDriver (e.g. Firefox geckodriver).

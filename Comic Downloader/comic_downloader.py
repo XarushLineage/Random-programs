@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from tkinter import Tk, filedialog
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
+from urllib.parse import urljoin, urlparse
 
 
 def get_save_directory():
@@ -42,10 +43,20 @@ def main():
 
     # Fetch the issue links from the main page
     response = requests.get(base_url)
+    resolved_base_url = response.url  # after redirects; guarantees scheme + host
+    parsed_base = urlparse(resolved_base_url)
+    base_origin = f"{parsed_base.scheme}://{parsed_base.netloc}"
     soup = BeautifulSoup(response.text, 'html.parser')
 
     # Example filtering: adjust selectors to match the target website
-    links = [a['href'] for a in soup.find_all('a', href=True) if 'Issue' in a.text]
+    # Use urljoin so that relative links become absolute URLs
+    links = []
+    for a in soup.find_all('a', href=True):
+        if 'Issue' not in a.get_text():
+            continue
+        absolute = urljoin(base_origin, a['href'])
+        if absolute.startswith(('http://', 'https://')):
+            links.append(absolute)
 
     if not links:
         print("No issue links found.")
@@ -71,7 +82,10 @@ def main():
 
             # Parse the updated page and download all images
             page_soup = BeautifulSoup(driver.page_source, 'html.parser')
-            images = [img['src'] for img in page_soup.find_all('img') if img.get('src')]
+            page_url = driver.current_url
+            images = [urljoin(page_url, img['src'])
+                      for img in page_soup.find_all('img')
+                      if img.get('src')]
 
             for idx, img_url in enumerate(images):
                 download_image(img_url, save_dir, idx)
